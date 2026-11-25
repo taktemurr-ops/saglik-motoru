@@ -598,3 +598,186 @@ String csvRow(List<Object?> cells) => cells.map((c) {
       final s = '${c ?? ''}';
       return s.contains(RegExp(r'[",\n]')) ? '"${s.replaceAll('"', '""')}"' : s;
     }).join(',');
+
+// ------------------------------------------------------ 30 gün meydan okuma
+
+/// 30 günlük hareket meydan okuması: [base]'den [peak]'e kademeli artış,
+/// her 4. gün dinlenme. [secs] ise hedef saniyedir (ör. plank).
+class Challenge {
+  final String key;
+  final String exercise;
+  final bool secs;
+  final int base;
+  final int peak;
+  const Challenge(this.key, this.exercise, this.base, this.peak, {this.secs = false});
+}
+
+const List<Challenge> kChallenges = [
+  Challenge('c_squat', 'squat', 15, 100),
+  Challenge('c_pushup', 'pushup', 5, 40),
+  Challenge('c_plank', 'plank', 20, 150, secs: true),
+  Challenge('c_lunge', 'lunge', 10, 60),
+  Challenge('c_crunch', 'crunch', 10, 80),
+  Challenge('c_wall_sit', 'wall_sit', 20, 120, secs: true),
+  Challenge('c_bridge', 'glute_bridge', 12, 80),
+  Challenge('c_jacks', 'jumping_jacks', 20, 150),
+];
+
+const int kChallengeDays = 30;
+
+/// 1–30 arası gün dinlenme günü mü? (4, 8, … 28)
+bool challengeRest(int day) => day % 4 == 0;
+
+/// Seviye çarpanı: 0 kolay, 1 orta, 2 zor.
+const List<double> kChallengeLevels = [0.6, 1.0, 1.4];
+
+/// [day]. günün hedefi (dinlenme günü 0). Saniyeler 5'e yuvarlanır.
+int challengeTarget(Challenge c, int day, int level) {
+  if (day < 1 || day > kChallengeDays || challengeRest(day)) return 0;
+  var work = 0, k = 0;
+  for (var d = 1; d <= kChallengeDays; d++) {
+    if (challengeRest(d)) continue;
+    if (d < day) k++;
+    work++;
+  }
+  final f = work <= 1 ? 1.0 : k / (work - 1);
+  final v = (c.base + (c.peak - c.base) * f) * kChallengeLevels[level.clamp(0, 2)];
+  if (c.secs) return math.max(5, (v / 5).round() * 5);
+  return math.max(1, v.round());
+}
+
+/// Toplam tekrar/saniye (bütün plan).
+int challengeTotal(Challenge c, int level) {
+  var s = 0;
+  for (var d = 1; d <= kChallengeDays; d++) {
+    s += challengeTarget(c, d, level);
+  }
+  return s;
+}
+
+// ------------------------------------------------------------- kafein
+
+/// İçecek: anahtar, yaklaşık kafein (mg) ve porsiyon (ml ya da g).
+class Drink {
+  final String key;
+  final int mg;
+  final int size;
+  final bool grams;
+  const Drink(this.key, this.mg, this.size, {this.grams = false});
+}
+
+/// Yaklaşık değerler (genel besin tablolarındaki tipik porsiyonlar);
+/// marka, demleme ve fincana göre çok değişir.
+const List<Drink> kDrinks = [
+  Drink('dr_espresso', 63, 30),
+  Drink('dr_double', 126, 60),
+  Drink('dr_filter', 95, 240),
+  Drink('dr_instant', 62, 240),
+  Drink('dr_turkish', 60, 65),
+  Drink('dr_black_tea', 47, 240),
+  Drink('dr_green_tea', 28, 240),
+  Drink('dr_matcha', 70, 240),
+  Drink('dr_cola', 32, 330),
+  Drink('dr_energy', 80, 250),
+  Drink('dr_cocoa', 5, 240),
+  Drink('dr_dark_choc', 24, 30, grams: true),
+  Drink('dr_decaf', 3, 240),
+];
+
+/// Yarılanma ömrüne göre şu an vücutta kalan yaklaşık kafein (mg).
+/// [entries]: (zaman, mg). Yalnızca kaba bir tahmindir.
+double caffeineAt(List<(DateTime, double)> entries, DateTime now, {double halfLifeHours = 5}) {
+  var s = 0.0;
+  for (final (at, mg) in entries) {
+    final h = now.difference(at).inMinutes / 60;
+    if (h < 0) continue;
+    s += mg * math.pow(0.5, h / halfLifeHours);
+  }
+  return s;
+}
+
+/// Kalan kafeinin [level] mg altına ineceği yaklaşık zaman (yoksa null).
+DateTime? caffeineBelow(List<(DateTime, double)> entries, DateTime now, double level, {double halfLifeHours = 5}) {
+  for (var m = 0; m <= 48 * 60; m += 10) {
+    final t = now.add(Duration(minutes: m));
+    if (caffeineAt(entries, t, halfLifeHours: halfLifeHours) <= level) return t;
+  }
+  return null;
+}
+
+/// Gün gün toplam (ISO gün → mg).
+Map<String, double> caffeineByDay(List<(DateTime, double)> entries) {
+  final out = <String, double>{};
+  for (final (at, mg) in entries) {
+    final k = isoDay(at);
+    out[k] = (out[k] ?? 0) + mg;
+  }
+  return out;
+}
+
+// ------------------------------------------------------------- yürüyüş
+
+/// Toplam tırmanış ve iniş (m). GPS gürültüsüne karşı [threshold] metrelik
+/// histerezis uygulanır.
+(double, double) elevationGainLoss(List<double> alts, {double threshold = 3}) {
+  if (alts.length < 2) return (0, 0);
+  var gain = 0.0, loss = 0.0;
+  var ref = alts.first;
+  for (final a in alts.skip(1)) {
+    final d = a - ref;
+    if (d >= threshold) {
+      gain += d;
+      ref = a;
+    } else if (d <= -threshold) {
+      loss -= d;
+      ref = a;
+    }
+  }
+  return (gain, loss);
+}
+
+/// Konumun rotaya uzaklığı ve rota boyunca katedilen mesafe (m).
+(double, double) routeProgress(List<(double, double)> route, double lat, double lon) {
+  if (route.isEmpty) return (double.infinity, 0);
+  if (route.length == 1) return (haversine(route[0].$1, route[0].$2, lat, lon), 0);
+  const r = 6371000.0;
+  final k = math.cos(lat * math.pi / 180);
+  (double, double) xy((double, double) p) =>
+      ((p.$2 - lon) * math.pi / 180 * r * k, (p.$1 - lat) * math.pi / 180 * r);
+  var best = double.infinity, along = 0.0, acc = 0.0;
+  for (var i = 1; i < route.length; i++) {
+    final a = xy(route[i - 1]), b = xy(route[i]);
+    final dx = b.$1 - a.$1, dy = b.$2 - a.$2;
+    final len2 = dx * dx + dy * dy;
+    final seg = math.sqrt(len2);
+    var tt = len2 == 0 ? 0.0 : -(a.$1 * dx + a.$2 * dy) / len2;
+    tt = tt.clamp(0.0, 1.0);
+    final px = a.$1 + dx * tt, py = a.$2 + dy * tt;
+    final d = math.sqrt(px * px + py * py);
+    if (d < best) {
+      best = d;
+      along = acc + seg * tt;
+    }
+    acc += seg;
+  }
+  return (best, along);
+}
+
+String _xml(String s) =>
+    s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
+
+/// GPX 1.1 izi. [pts]: (enlem, boylam, yükseklik?, zaman ms?).
+String toGpx(String name, List<(double, double, double?, int?)> pts) {
+  final b = StringBuffer()
+    ..writeln('<?xml version="1.0" encoding="UTF-8"?>')
+    ..writeln('<gpx version="1.1" creator="saglik_motoru" xmlns="http://www.topografix.com/GPX/1/1">')
+    ..writeln('  <trk><name>${_xml(name)}</name><trkseg>');
+  for (final (la, lo, ele, ms) in pts) {
+    b.write('    <trkpt lat="${la.toStringAsFixed(6)}" lon="${lo.toStringAsFixed(6)}">');
+    if (ele != null) b.write('<ele>${ele.toStringAsFixed(1)}</ele>');
+    if (ms != null) b.write('<time>${DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true).toIso8601String()}</time>');
+    b.writeln('</trkpt>');
+  }
+  b.writeln('  </trkseg></trk>\n</gpx>');
+  return b.toString();
+}

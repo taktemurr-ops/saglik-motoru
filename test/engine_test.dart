@@ -9,9 +9,9 @@ import 'package:studio_core/apps/apps.dart';
 import 'package:studio_core/core/save_store.dart';
 
 void main() {
-  test('30 araç, 33 dilde ad ve açıklama, hepsinde esenlik uyarısı', () {
-    expect(saglikTools.length, 30);
-    expect(saglikTools.map((t) => t.id).toSet().length, 30);
+  test('33 araç, 33 dilde ad ve açıklama, hepsinde esenlik uyarısı', () {
+    expect(saglikTools.length, 33);
+    expect(saglikTools.map((t) => t.id).toSet().length, 33);
     for (final t in saglikTools) {
       expect(t.title.length, 33, reason: t.id);
       expect(t.tagline.length, 33, reason: t.id);
@@ -230,12 +230,68 @@ void main() {
     }
   });
 
+  test('30 gün meydan okuma planı', () {
+    final c = kChallenges.firstWhere((c) => c.key == 'c_squat');
+    expect(challengeRest(4), isTrue);
+    expect(challengeRest(5), isFalse);
+    expect(challengeTarget(c, 4, 1), 0);
+    expect(challengeTarget(c, 1, 1), 15);
+    expect(challengeTarget(c, 30, 1), 100);
+    expect(challengeTarget(c, 30, 0), 60);
+    expect(challengeTarget(c, 30, 2), 140);
+    // Artış tekdüze: dinlenme dışı günlerde hedef hiç azalmaz.
+    var last = 0;
+    for (var d = 1; d <= kChallengeDays; d++) {
+      final v = challengeTarget(c, d, 1);
+      if (v == 0) continue;
+      expect(v, greaterThanOrEqualTo(last));
+      last = v;
+    }
+    final p = kChallenges.firstWhere((c) => c.secs);
+    expect(challengeTarget(p, 2, 1) % 5, 0);
+    expect(challengeTotal(c, 1), greaterThan(1000));
+    for (final ch in kChallenges) {
+      expect(kExercises.any((e) => e.key == ch.exercise), isTrue, reason: ch.key);
+    }
+  });
+
+  test('kafein: yarılanma, gün toplamı', () {
+    final t0 = DateTime(2026, 11, 25, 8);
+    final e = [(t0, 200.0)];
+    expect(caffeineAt(e, t0), closeTo(200, 1e-9));
+    expect(caffeineAt(e, t0.add(const Duration(hours: 5))), closeTo(100, 1e-6));
+    expect(caffeineAt(e, t0.add(const Duration(hours: 10)), halfLifeHours: 5), closeTo(50, 1e-6));
+    expect(caffeineAt(e, t0.subtract(const Duration(hours: 1))), 0);
+    final below = caffeineBelow(e, t0, 50)!;
+    expect(below.difference(t0).inMinutes, closeTo(600, 10));
+    final by = caffeineByDay([(t0, 95.0), (t0.add(const Duration(hours: 3)), 63.0), (t0.add(const Duration(days: 1)), 47.0)]);
+    expect(by['2026-11-25'], 158);
+    expect(by['2026-11-26'], 47);
+    expect(kDrinks.every((d) => d.mg >= 0 && d.size > 0), isTrue);
+  });
+
+  test('yürüyüş: tırmanış, rotaya uzaklık, GPX', () {
+    final (g, l) = elevationGainLoss([100, 101, 102, 104, 103, 110, 108, 104, 100]);
+    expect(g, closeTo(10, 1e-9));
+    expect(l, closeTo(10, 1e-9));
+    expect(elevationGainLoss([100, 101, 100, 101]).$1, 0);
+    final route = [(41.0, 29.0), (41.0, 29.01)];
+    final (off, along) = routeProgress(route, 41.0009, 29.005);
+    expect(off, closeTo(100, 2));
+    expect(along, closeTo(routeLength(route) / 2, 3));
+    final gpx = toGpx('Sahil <yolu>', [(41.0, 29.0, 12.5, 0), (41.001, 29.001, null, null)]);
+    expect(gpx, contains('<gpx version="1.1"'));
+    expect(gpx, contains('Sahil &lt;yolu&gt;'));
+    expect(gpx, contains('<ele>12.5</ele>'));
+    expect(RegExp('<trkpt').allMatches(gpx).length, 2);
+  });
+
   for (final id in [
     'uyg-vucut-kitle-indeksi', 'uyg-su-icme-hatirlatici', 'uyg-kalori-sayaci', 'uyg-makro-besin-hesaplayici',
     'uyg-kilo-takibi', 'uyg-antrenman-zamanlayici', 'uyg-ev-egzersiz-programi', 'uyg-yoga-akislari',
     'uyg-satranc-saati', 'uyg-turnuva-fiksturu', 'uyg-ruh-hali-gunlugu', 'uyg-sukur-gunlugu', 'uyg-ruya-gunlugu',
     'uyg-sigara-birakma', 'uyg-uyku-gunlugu', 'uyg-tansiyon-ve-seker-gunlugu', 'uyg-gorme-ve-renk-korlugu-testi',
-    'uyg-aralikli-oruc-takibi',
+    'uyg-aralikli-oruc-takibi', 'uyg-30-gun-meydan-okuma', 'uyg-kafein-takibi', 'uyg-yuruyus-rotalari',
   ]) {
     testWidgets('araç ekranı açılır: $id', (tester) async {
       final s = AppServices(hubId: 'm', backend: MemoryBackend(), ads: NoAdsService(), purchases: NoPurchaseService());

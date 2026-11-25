@@ -1,4 +1,4 @@
-/// Üretilmiş dosya (proto/apps/saglik/mkengine.py). Sağlık ve Spor'un 30 aracı.
+/// Üretilmiş dosya (proto/apps/saglik/mkengine.py). Sağlık ve Spor'un 33 aracı.
 /// Hepsinde "tıbbi cihaz değildir" (AppDisclaimer.wellness) bandı görünür.
 library;
 
@@ -6,11 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:studio_core/apps/apps.dart';
 
 import 'tools/activity.dart';
+import 'tools/caffeine.dart';
+import 'tools/challenge.dart';
 import 'tools/check.dart';
 import 'tools/food.dart';
 import 'tools/journal.dart';
 import 'tools/routines.dart';
 import 'tools/sport.dart';
+import 'tools/walk.dart';
 import 'tx.dart';
 
 /// Kategoriler (merkezdeki çip sırası).
@@ -353,6 +356,39 @@ final List<AppTool> saglikTools = [
     disclaimer: AppDisclaimer.wellness,
     keywords: const ['pulse', 'heart rate'],
     builder: (context, t) => PulseTool(t),
+  ),
+  AppTool(
+    id: 'uyg-30-gun-meydan-okuma',
+    title: kSaglikTitle['uyg-30-gun-meydan-okuma']!,
+    tagline: kSaglikTag['uyg-30-gun-meydan-okuma']!,
+    icon: Icons.emoji_events_rounded,
+    color: const Color(0xFFFFA726),
+    category: 'move',
+    disclaimer: AppDisclaimer.wellness,
+    keywords: const ['30 day', 'challenge', 'squat', 'plank'],
+    builder: (context, t) => ChallengeTool(t),
+  ),
+  AppTool(
+    id: 'uyg-kafein-takibi',
+    title: kSaglikTitle['uyg-kafein-takibi']!,
+    tagline: kSaglikTag['uyg-kafein-takibi']!,
+    icon: Icons.coffee_rounded,
+    color: const Color(0xFF8D6E63),
+    category: 'food',
+    disclaimer: AppDisclaimer.wellness,
+    keywords: const ['caffeine', 'coffee', 'tea'],
+    builder: (context, t) => CaffeineTool(t),
+  ),
+  AppTool(
+    id: 'uyg-yuruyus-rotalari',
+    title: kSaglikTitle['uyg-yuruyus-rotalari']!,
+    tagline: kSaglikTag['uyg-yuruyus-rotalari']!,
+    icon: Icons.hiking_rounded,
+    color: const Color(0xFF66BB6A),
+    category: 'move',
+    disclaimer: AppDisclaimer.wellness,
+    keywords: const ['walking', 'hiking', 'gpx', 'route'],
+    builder: (context, t) => WalkTool(t),
   ),
 ];
 

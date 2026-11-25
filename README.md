@@ -1,6 +1,6 @@
 # saglik-motoru
 
-Sağlık ve Spor ailesinin motoru: 30 aracın gerçek uygulamaları, 33 dilde metinleri ve merkez
+Sağlık ve Spor ailesinin motoru: 33 aracın gerçek uygulamaları, 33 dilde metinleri ve merkez
 görünümü (onaylı oyun merkezi tasarımının deniz yeşili zemin, mercan vurgulu tonu).
 
 - Çatı: `studio_core/apps` (AppTool, AppHubShell, reklam/satın alma, gizlilik, favoriler).
@@ -30,3 +30,12 @@ görünümü (onaylı oyun merkezi tasarımının deniz yeşili zemin, mercan vu
 
 Metinler `proto/apps/saglik/` altındaki dosyalardan `mkengine.py` ile üretilir
 (`lib/src/tx.dart`, `lib/src/registry.dart`); ince depolar ve merkez `mkrepos.py` ile.
+
+## 2. tur ekleri
+- **30 Gün Meydan Okuma**: 8 hareket (çömelme, şınav, plank, hamle, mekik, duvarda oturma, köprü,
+  zıplama), üç seviye, her 4. gün dinlenme, günde bir adım; kaçırılan gün planı bozmaz.
+- **Kafein Takibi**: yaklaşık değerli hazır içecekler ve kendi içeceğin, kendi belirlediğin sınır,
+  7 günlük grafik, yarılanma ömrüyle kaba "kalan kafein" tahmini (tıbbi değil).
+- **Yürüyüş Rotaları**: yalnızca ekran açıkken GPS kaydı, tırmanış/iniş, tahmini adım, adlı rotalar,
+  yükseklik profili, GPX paylaşma (`share_plus`), kayıtlı rotayı yeniden yürürken rotaya uzaklık ve
+  kalan mesafe. Harita karosu yok; tamamen çevrimdışı.
