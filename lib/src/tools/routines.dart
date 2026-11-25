@@ -238,7 +238,7 @@ class _RoutineToolState extends State<RoutineTool> {
           ]),
           const SizedBox(height: 8),
           SizedBox(
-            height: 86,
+            height: 96,
             child: ListView(scrollDirection: Axis.horizontal, children: [
               for (final s in r.steps)
                 SizedBox(
