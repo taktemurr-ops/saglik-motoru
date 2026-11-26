@@ -778,7 +778,10 @@ class FigurePainter extends CustomPainter {
   final Pose? b;
   final double t;
   final Color color;
-  FigurePainter(this.a, this.b, this.t, this.color);
+
+  /// Duvarın x konumu (0..100; duvar pilatesi), yoksa null.
+  final double? wall;
+  FigurePainter(this.a, this.b, this.t, this.color, {this.wall});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -795,6 +798,19 @@ class FigurePainter extends CustomPainter {
       ..color = Colors.white24
       ..strokeWidth = 2 * s / 2;
     canvas.drawLine(Offset(ox + 4 * s, oy + 95 * s), Offset(ox + 96 * s, oy + 95 * s), ground);
+    final w = wall;
+    if (w != null) {
+      // Duvar: hafif dolgu ve kenar çizgisi (figürün arkasında).
+      final left = w < 50;
+      final edge = ox + w * s;
+      canvas.drawRect(
+        Rect.fromLTRB(left ? ox : edge, oy + 2 * s, left ? edge : ox + 100 * s, oy + 95 * s),
+        Paint()..color = Colors.white.withValues(alpha: 0.08),
+      );
+      canvas.drawLine(Offset(edge, oy + 2 * s), Offset(edge, oy + 95 * s), Paint()
+        ..color = Colors.white54
+        ..strokeWidth = 1.6 * s);
+    }
     final line = Paint()
       ..color = color
       ..strokeWidth = 4.2 * s
@@ -815,7 +831,8 @@ class FigurePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(FigurePainter old) => old.t != t || old.a != a || old.b != b || old.color != color;
+  bool shouldRepaint(FigurePainter old) =>
+      old.t != t || old.a != a || old.b != b || old.color != color || old.wall != wall;
 }
 
 /// Hareketli çizim: iki duruş arasında ritimle gidip gelir.
@@ -860,7 +877,7 @@ class _FigureState extends State<Figure> with SingleTickerProviderStateMixin {
         animation: _c,
         builder: (_, __) => CustomPaint(
           size: Size.infinite,
-          painter: FigurePainter(widget.ex.a, widget.ex.b, Curves.easeInOut.transform(_c.value), s.accent),
+          painter: FigurePainter(widget.ex.a, widget.ex.b, Curves.easeInOut.transform(_c.value), s.accent, wall: widget.ex.wall),
         ),
       ),
     );
@@ -958,6 +975,11 @@ class _RoutinePlayerState extends State<RoutinePlayer> {
           const SizedBox(height: 8),
           if (ph.kind == 1) Text(Lf(t, 'step_x', {'n': ph.round + 1, 'm': widget.routine.steps.length})),
           if (ph.kind != 1 && next != null) Text('${L(t, 'next_up')}: ${L(t, 'ex_$next')}'),
+          if (label != null && kSaglikL.containsKey('tip_$label'))
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(L(t, 'tip_$label'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70)),
+            ),
         ]),
       ),
       Wrap(alignment: WrapAlignment.center, spacing: 12, children: [

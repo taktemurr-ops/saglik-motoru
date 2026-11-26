@@ -124,12 +124,35 @@ const Pose pCobra = [72, 56, 66, 66, 40, 88, 64, 80, 66, 90, 65, 80, 67, 90, 26,
 const Pose pRest = [12, 86, 20, 86, 50, 86, 32, 88, 44, 89, 33, 88, 45, 89, 68, 87, 86, 88, 68, 87, 86, 88];
 
 /// Egzersiz: iki duruş arasında gidip gelir; [b] yoksa duruş tutulur.
+/// [wall]: duvar pilatesi hareketlerinde duvarın x konumu (0..100), çizimde
+/// dikey bir çizgi olarak görünür.
 class Exercise {
   final String key;
   final Pose a;
   final Pose? b;
-  const Exercise(this.key, this.a, [this.b]);
+  final double? wall;
+  const Exercise(this.key, this.a, [this.b, this.wall]);
 }
+
+// ------------------------------------------------------- duvar pilatesi
+// Yandan görünüş; duvar dikey çizgi. Koordinatlar özgündür (fotoğraf yok).
+
+const Pose pwSit = [30, 30, 30, 40, 30, 64, 38, 52, 47, 60, 39, 52, 48, 61, 52, 64, 52, 93, 53, 64, 53, 93];
+const Pose pwAngelDown = [50, 12, 50, 22, 50, 52, 36, 22, 34, 10, 64, 22, 66, 10, 47, 72, 46, 93, 53, 72, 54, 93];
+const Pose pwAngelUp = [50, 12, 50, 22, 50, 52, 42, 10, 46, 2, 58, 10, 54, 2, 47, 72, 46, 93, 53, 72, 54, 93];
+const Pose pwPushOut = [60, 16, 58, 26, 46, 54, 68, 30, 77, 30, 68, 31, 77, 31, 41, 74, 36, 93, 42, 74, 37, 93];
+const Pose pwPushIn = [67, 17, 64, 27, 50, 55, 64, 40, 77, 30, 64, 41, 77, 31, 43, 74, 36, 93, 44, 74, 37, 93];
+const Pose pwPlank = [66, 22, 62, 30, 44, 58, 77, 36, 77, 24, 77, 37, 77, 25, 37, 76, 30, 93, 38, 76, 31, 93];
+const Pose pwCalfDown = [60, 12, 60, 22, 58, 52, 68, 30, 77, 28, 68, 31, 77, 29, 58, 72, 58, 93, 59, 72, 59, 93];
+const Pose pwCalfUp = [60, 7, 60, 17, 58, 47, 68, 26, 77, 24, 68, 27, 77, 25, 58, 68, 60, 89, 59, 68, 61, 89];
+const Pose pwKickBack = [63, 14, 62, 24, 56, 52, 69, 31, 77, 28, 69, 32, 77, 29, 56, 72, 56, 93, 46, 66, 32, 74];
+const Pose pwSideA = [50, 12, 50, 22, 50, 52, 38, 34, 27, 40, 60, 40, 54, 50, 47, 72, 46, 93, 53, 72, 54, 93];
+const Pose pwSideB = [48, 12, 49, 22, 50, 52, 38, 34, 27, 40, 60, 40, 54, 50, 47, 72, 46, 93, 62, 70, 72, 82];
+const Pose pwBridgeDown = [14, 86, 22, 86, 50, 86, 32, 88, 44, 89, 33, 88, 45, 89, 66, 66, 81, 72, 67, 66, 81, 73];
+const Pose pwBridgeUp = [14, 86, 22, 86, 52, 68, 32, 88, 44, 89, 33, 88, 45, 89, 68, 58, 81, 70, 69, 58, 81, 71];
+const Pose pwLegsUp = [14, 88, 22, 88, 54, 88, 30, 90, 40, 91, 31, 90, 41, 91, 57, 64, 58, 40, 58, 64, 59, 40];
+const Pose pwRollUp = [44, 12, 44, 22, 44, 52, 46, 36, 47, 50, 46, 37, 47, 51, 46, 72, 50, 93, 47, 72, 51, 93];
+const Pose pwRollDown = [54, 58, 52, 48, 43, 50, 56, 64, 58, 76, 57, 64, 59, 76, 47, 72, 50, 93, 48, 72, 51, 93];
 
 const List<Exercise> kExercises = [
   Exercise('jumping_jacks', pStand, pJackOpen),
@@ -160,6 +183,17 @@ const List<Exercise> kExercises = [
   Exercise('y_cobra', pCobra),
   Exercise('y_bridge', pBridgeUp),
   Exercise('y_rest', pRest),
+  // duvar pilatesi
+  Exercise('wp_wall_sit', pwSit, null, 24),
+  Exercise('wp_wall_angels', pwAngelDown, pwAngelUp),
+  Exercise('wp_wall_pushup', pwPushOut, pwPushIn, 79),
+  Exercise('wp_wall_plank', pwPlank, null, 79),
+  Exercise('wp_calf_raise', pwCalfDown, pwCalfUp, 79),
+  Exercise('wp_glute_kick', pwCalfDown, pwKickBack, 79),
+  Exercise('wp_side_leg', pwSideA, pwSideB, 25),
+  Exercise('wp_wall_bridge', pwBridgeDown, pwBridgeUp, 83),
+  Exercise('wp_legs_up', pwLegsUp, null, 61),
+  Exercise('wp_roll_down', pwRollUp, pwRollDown, 40),
 ];
 
 Exercise exercise(String key) => kExercises.firstWhere((e) => e.key == key);
@@ -194,6 +228,36 @@ const List<Routine> kYoga = [
   Routine('r_balance', [('y_mountain', 30), ('y_tree', 40), ('y_warrior', 40), ('y_triangle', 40), ('y_tree', 40), ('y_rest', 60)]),
   Routine('r_calm', [('y_child', 60), ('y_cat_cow', 45), ('y_bridge', 40), ('y_cobra', 30), ('y_rest', 90)], extra: true),
 ];
+
+/// Duvar pilatesi rutinleri (adımlar arası kısa dinlenme).
+const List<Routine> kWallPilates = [
+  Routine('r_wp_start', [('wp_wall_angels', 40), ('wp_calf_raise', 40), ('wp_wall_pushup', 40), ('wp_wall_sit', 30), ('wp_wall_bridge', 40), ('wp_legs_up', 60)], rest: 15),
+  Routine('r_wp_core', [('wp_roll_down', 40), ('wp_wall_plank', 30), ('wp_wall_bridge', 45), ('wp_wall_sit', 40), ('wp_wall_plank', 30), ('wp_legs_up', 60)], rest: 15),
+  Routine('r_wp_lower', [('wp_calf_raise', 45), ('wp_glute_kick', 45), ('wp_side_leg', 45), ('wp_wall_sit', 45), ('wp_wall_bridge', 45), ('wp_legs_up', 60)], rest: 15),
+  Routine('r_wp_upper', [('wp_wall_angels', 45), ('wp_wall_pushup', 45), ('wp_wall_plank', 40), ('wp_roll_down', 45), ('wp_wall_pushup', 45), ('wp_legs_up', 60)], rest: 15),
+  Routine('r_wp_relax', [('wp_roll_down', 45), ('wp_wall_angels', 45), ('wp_legs_up', 120)], extra: true),
+];
+
+/// 28 günlük duvar pilatesi planı: her hafta 5 egzersiz günü, 2 dinlenme
+/// günü (null). Haftalar ilerledikçe süre [wallPilatesScale] ile uzar.
+const List<String?> kWallPilatesPlan = [
+  'r_wp_start', 'r_wp_lower', null, 'r_wp_upper', 'r_wp_core', 'r_wp_start', null,
+  'r_wp_lower', 'r_wp_upper', null, 'r_wp_core', 'r_wp_start', 'r_wp_lower', null,
+  'r_wp_upper', 'r_wp_core', null, 'r_wp_lower', 'r_wp_upper', 'r_wp_core', null,
+  'r_wp_start', 'r_wp_lower', null, 'r_wp_upper', 'r_wp_core', 'r_wp_lower', null,
+];
+
+/// Plan haftasına göre hareket süresi çarpanı (1. hafta 1.0 → 4. hafta 1.3).
+double wallPilatesScale(int day) => 1.0 + 0.1 * (day.clamp(0, 27) ~/ 7);
+
+/// Planın [day]. günü (0'dan) için ölçeklenmiş rutin; dinlenme günüyse null.
+Routine? wallPilatesDay(int day) {
+  final key = kWallPilatesPlan[day.clamp(0, kWallPilatesPlan.length - 1)];
+  if (key == null) return null;
+  final base = kWallPilates.firstWhere((r) => r.key == key);
+  final k = wallPilatesScale(day);
+  return Routine(base.key, [for (final s in base.steps) (s.$1, (s.$2 * k / 5).round() * 5)], rest: base.rest);
+}
 
 /// Göz egzersizleri: çizim yerine hareketli nokta kılavuzu.
 const List<(String, int)> kEyeSteps = [

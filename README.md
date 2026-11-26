@@ -1,6 +1,6 @@
 # saglik-motoru
 
-Sağlık ve Spor ailesinin motoru: 33 aracın gerçek uygulamaları, 33 dilde metinleri ve merkez
+Sağlık ve Spor ailesinin motoru: 35 aracın gerçek uygulamaları, 33 dilde metinleri ve merkez
 görünümü (onaylı oyun merkezi tasarımının deniz yeşili zemin, mercan vurgulu tonu).
 
 - Çatı: `studio_core/apps` (AppTool, AppHubShell, reklam/satın alma, gizlilik, favoriler).
@@ -39,3 +39,15 @@ Metinler `proto/apps/saglik/` altındaki dosyalardan `mkengine.py` ile üretilir
 - **Yürüyüş Rotaları**: yalnızca ekran açıkken GPS kaydı, tırmanış/iniş, tahmini adım, adlı rotalar,
   yükseklik profili, GPX paylaşma (`share_plus`), kayıtlı rotayı yeniden yürürken rotaya uzaklık ve
   kalan mesafe. Harita karosu yok; tamamen çevrimdışı.
+
+## 4. tur araçları
+- **Duvar Pilatesi** (`tools/pilates.dart`, `data.dart`): kodla çizilmiş duvar + çöp adam (10 özgün hareket),
+  5 rutin (biri ödüllü reklamla/Premium ile), 28 günlük plan (haftada 5 seans, 2 dinlenme; süre her hafta %10
+  uzar), hareket ipuçları oynatıcıda görünür. Esenlik uyarısı; tıbbi iddia yok.
+- **Uyku Sesi Kaydı** (`tools/sleep_sound.dart`, `sleep_sound.dart`, `platform/clips*.dart`): gece boyunca
+  mikrofon düzeyi (16 kHz PCM, `record`) yarım saniyelik pencerelerle ortam düzeyine göre izlenir; belirgin ses
+  olayları zamanıyla, isteğe bağlı ≤20 sn kesitler (gecede ≤40, WAV) yalnızca uygulamanın belgeler klasöründe
+  saklanır. Dakika başına düzey grafiği, saat başına olay, etken notları. Ses türü sınıflandırılmaz; horlama/apne
+  **tespiti ya da teşhisi yoktur**. Kayıt sırasında ekran açık tutulur (wakelock); ön plan hizmeti yoktur, ekran
+  kilitlenirse kayıt durabilir (kullanıcıya söylenir). Web'de desteklenmez (dürüst bilgi kartı).
+

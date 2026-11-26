@@ -249,7 +249,7 @@ class _RoutineToolState extends State<RoutineTool> {
                       height: 56,
                       child: CustomPaint(
                         size: const Size(56, 56),
-                        painter: FigurePainter(exercise(s.$1).a, null, 0, AppLook.of(context).accent),
+                        painter: FigurePainter(exercise(s.$1).a, null, 0, AppLook.of(context).accent, wall: exercise(s.$1).wall),
                       ),
                     ),
                     Text(L(t, 'ex_${s.$1}'),

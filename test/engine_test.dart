@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,9 +10,9 @@ import 'package:studio_core/apps/apps.dart';
 import 'package:studio_core/core/save_store.dart';
 
 void main() {
-  test('33 araç, 33 dilde ad ve açıklama, hepsinde esenlik uyarısı', () {
-    expect(saglikTools.length, 33);
-    expect(saglikTools.map((t) => t.id).toSet().length, 33);
+  test('35 araç, 33 dilde ad ve açıklama, hepsinde esenlik uyarısı', () {
+    expect(saglikTools.length, 35);
+    expect(saglikTools.map((t) => t.id).toSet().length, 35);
     for (final t in saglikTools) {
       expect(t.title.length, 33, reason: t.id);
       expect(t.tagline.length, 33, reason: t.id);
@@ -219,7 +220,7 @@ void main() {
   });
 
   test('rutinler ve egzersiz çizimleri tutarlı', () {
-    for (final r in [...kWorkouts, ...kStretches, ...kYoga]) {
+    for (final r in [...kWorkouts, ...kStretches, ...kYoga, ...kWallPilates]) {
       for (final s in r.steps) {
         expect(kExercises.any((e) => e.key == s.$1), isTrue, reason: s.$1);
       }
@@ -228,6 +229,69 @@ void main() {
       expect(e.a.length, 22, reason: e.key);
       if (e.b != null) expect(e.b!.length, 22, reason: e.key);
     }
+  });
+
+  test('duvar pilatesi: 28 günlük plan, dinlenme günleri, haftalık artış', () {
+    expect(kWallPilatesPlan.length, 28);
+    expect(kWallPilatesPlan.where((d) => d == null).length, 8);
+    for (final e in kExercises.where((e) => e.key.startsWith('wp_'))) {
+      if (e.key != 'wp_wall_angels') expect(e.wall, isNotNull, reason: e.key);
+    }
+    final d0 = wallPilatesDay(0)!;
+    expect(d0.key, 'r_wp_start');
+    expect(d0.steps.first.$2, 40);
+    expect(wallPilatesDay(2), isNull);
+    final d21 = wallPilatesDay(21)!;
+    expect(wallPilatesScale(21), closeTo(1.3, 1e-9));
+    expect(d21.steps.first.$2, 50);
+    expect(d21.seconds, greaterThan(d0.seconds));
+  });
+
+  test('uyku sesi: olay bulma, kesit, dakika düzeyi, WAV', () {
+    const rate = 16000;
+    final rnd = math.Random(1);
+    Int16List quiet(int sec) => Int16List.fromList([for (var i = 0; i < rate * sec; i++) rnd.nextInt(201) - 100]);
+    Int16List loud(int sec) =>
+        Int16List.fromList([for (var i = 0; i < rate * sec; i++) (8000 * math.sin(2 * math.pi * 220 * i / rate)).round()]);
+    SoundEvent? got;
+    Int16List? clip;
+    final d = SoundDetector(rate: rate, threshold: 10, onEvent: (e, c) {
+      got = e;
+      clip = c;
+    });
+    d.add(quiet(10));
+    expect(d.events, isEmpty);
+    d.add(loud(3));
+    expect(d.active, isTrue);
+    d.add(quiet(10));
+    d.close();
+    expect(d.events.length, 1);
+    expect(got!.at, 10);
+    expect(got!.dur, 3);
+    expect(got!.peak, greaterThan(30));
+    // 2 sn ön kayıt + 3 sn olay + 3 sn sessizlik = 8 sn
+    expect(clip!.length, 8 * rate);
+    expect(d.levels.length, 1);
+    expect(d.levels.first, greaterThan(30));
+    final wav = pcmToWav(clip!, rate);
+    expect(String.fromCharCodes(wav.sublist(0, 4)), 'RIFF');
+    expect(wav.length, 44 + clip!.length * 2);
+    final carry = <int>[];
+    final a = pcmBytes(Uint8List.fromList([1, 0, 2]), carry);
+    expect(a, [1]);
+    expect(carry, [2]);
+    final b = pcmBytes(Uint8List.fromList([1]), carry);
+    expect(b, [258]);
+    final n = NightRecord(
+      id: 'n', start: DateTime(2026, 1, 1, 23), end: DateTime(2026, 1, 2, 7),
+      events: [const SoundEvent(60, 30, 20, 'n_0.wav'), const SoundEvent(3600, 90, 25)], levels: const [0, 5, 40],
+    );
+    expect(n.minutes, 480);
+    expect(n.soundSeconds, 120);
+    expect(n.perHour, closeTo(0.25, 1e-9));
+    final back = NightRecord.fromJson(n.toJson())!;
+    expect(back.events.first.clip, 'n_0.wav');
+    expect(back.levels, [0, 5, 40]);
   });
 
   test('30 gün meydan okuma planı', () {
@@ -292,6 +356,7 @@ void main() {
     'uyg-satranc-saati', 'uyg-turnuva-fiksturu', 'uyg-ruh-hali-gunlugu', 'uyg-sukur-gunlugu', 'uyg-ruya-gunlugu',
     'uyg-sigara-birakma', 'uyg-uyku-gunlugu', 'uyg-tansiyon-ve-seker-gunlugu', 'uyg-gorme-ve-renk-korlugu-testi',
     'uyg-aralikli-oruc-takibi', 'uyg-30-gun-meydan-okuma', 'uyg-kafein-takibi', 'uyg-yuruyus-rotalari',
+    'uyg-duvar-pilatesi', 'uyg-uyku-sesi-kaydi',
   ]) {
     testWidgets('araç ekranı açılır: $id', (tester) async {
       final s = AppServices(hubId: 'm', backend: MemoryBackend(), ads: NoAdsService(), purchases: NoPurchaseService());

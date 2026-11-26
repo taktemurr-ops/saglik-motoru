@@ -1,4 +1,4 @@
-/// Üretilmiş dosya (proto/apps/saglik/mkengine.py). Sağlık ve Spor'un 33 aracı.
+/// Üretilmiş dosya (proto/apps/saglik/mkengine.py). Sağlık ve Spor'un 35 aracı.
 /// Hepsinde "tıbbi cihaz değildir" (AppDisclaimer.wellness) bandı görünür.
 library;
 
@@ -11,7 +11,9 @@ import 'tools/challenge.dart';
 import 'tools/check.dart';
 import 'tools/food.dart';
 import 'tools/journal.dart';
+import 'tools/pilates.dart';
 import 'tools/routines.dart';
+import 'tools/sleep_sound.dart';
 import 'tools/sport.dart';
 import 'tools/walk.dart';
 import 'tx.dart';
@@ -389,6 +391,28 @@ final List<AppTool> saglikTools = [
     disclaimer: AppDisclaimer.wellness,
     keywords: const ['walking', 'hiking', 'gpx', 'route'],
     builder: (context, t) => WalkTool(t),
+  ),
+  AppTool(
+    id: 'uyg-duvar-pilatesi',
+    title: kSaglikTitle['uyg-duvar-pilatesi']!,
+    tagline: kSaglikTag['uyg-duvar-pilatesi']!,
+    icon: Icons.accessibility_new_rounded,
+    color: const Color(0xFF4DB6AC),
+    category: 'move',
+    disclaimer: AppDisclaimer.wellness,
+    keywords: const ['wall pilates', 'pilates', 'duvar', '28 day', 'stretch'],
+    builder: (context, t) => WallPilatesTool(t),
+  ),
+  AppTool(
+    id: 'uyg-uyku-sesi-kaydi',
+    title: kSaglikTitle['uyg-uyku-sesi-kaydi']!,
+    tagline: kSaglikTag['uyg-uyku-sesi-kaydi']!,
+    icon: Icons.graphic_eq_rounded,
+    color: const Color(0xFF9FA8DA),
+    category: 'mind',
+    disclaimer: AppDisclaimer.wellness,
+    keywords: const ['sleep', 'snore', 'horlama', 'night sounds', 'recorder', 'journal'],
+    builder: (context, t) => SleepSoundTool(t),
   ),
 ];
 
