@@ -4,6 +4,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:studio_core/app/studio_ui.dart';
 import 'package:studio_core/apps/apps.dart';
 
 import '../common.dart';
@@ -164,10 +165,10 @@ class _ChallengeToolState extends State<ChallengeTool> {
                   ),
                   alignment: Alignment.center,
                   child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Text('$d', style: TextStyle(fontWeight: FontWeight.w900, color: done.contains(d) ? Colors.black : Colors.white)),
+                    Text('$d', style: TextStyle(fontWeight: FontWeight.w900, color: done.contains(d) ? StudioLook.of(context).onAccent : Colors.white)),
                     Text(
                       challengeRest(d) ? '☾' : '${challengeTarget(c, d, level)}',
-                      style: TextStyle(fontSize: 10, color: done.contains(d) ? Colors.black87 : Colors.white60),
+                      style: TextStyle(fontSize: 10, color: done.contains(d) ? StudioLook.of(context).onAccent.withValues(alpha: 0.8) : Colors.white60),
                     ),
                   ]),
                 ),

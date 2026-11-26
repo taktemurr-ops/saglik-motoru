@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:studio_core/app/studio_ui.dart';
 import 'package:studio_core/apps/apps.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -126,7 +127,7 @@ class _ChessClockToolState extends State<ChessClockTool> {
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: flagged ? Colors.red.shade700 : (active ? AppLook.of(context).accent : Colors.white10),
+              color: flagged ? Colors.red.shade700 : (active ? StudioLook.of(context).accent : Colors.white10),
               borderRadius: BorderRadius.circular(24),
             ),
             alignment: Alignment.center,
@@ -134,8 +135,8 @@ class _ChessClockToolState extends State<ChessClockTool> {
               quarterTurns: p == 0 ? 2 : 0,
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 Text(_fmt(c.remaining(p, now)),
-                    style: TextStyle(fontSize: 72, fontWeight: FontWeight.w900, color: active ? Colors.black : Colors.white)),
-                Text('${L(t, 'moves')}: ${c.moves[p]}', style: TextStyle(color: active ? Colors.black87 : Colors.white70)),
+                    style: TextStyle(fontSize: 72, fontWeight: FontWeight.w900, color: active ? StudioLook.of(context).onAccent : Colors.white)),
+                Text('${L(t, 'moves')}: ${c.moves[p]}', style: TextStyle(color: active ? StudioLook.of(context).onAccent.withValues(alpha: 0.8) : Colors.white70)),
               ]),
             ),
           ),
