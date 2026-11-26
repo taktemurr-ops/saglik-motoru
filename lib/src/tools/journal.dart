@@ -255,15 +255,19 @@ class _MoodToolState extends State<MoodTool> {
     return ToolList(children: [
       if (_help) CrisisCard(t),
       Section(L(t, 'how_feel'), icon: Icons.mood_rounded, children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          for (var i = 0; i < 5; i++)
-            IconButton(
-              iconSize: 44,
-              tooltip: L(t, 'mood_$i'),
-              icon: Icon(_faces[i], color: _level == i ? _colors[i] : Colors.white54),
-              onPressed: () => setState(() => _level = i),
-            ),
-        ]),
+        // Dar ekranda beş yüz sığacak kadar küçülür.
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            for (var i = 0; i < 5; i++)
+              IconButton(
+                iconSize: 44,
+                tooltip: L(t, 'mood_$i'),
+                icon: Icon(_faces[i], color: _level == i ? _colors[i] : Colors.white54),
+                onPressed: () => setState(() => _level = i),
+              ),
+          ]),
+        ),
         if (_level != null) Text(L(t, 'mood_${_level!}'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w800)),
         const SizedBox(height: 6),
         Wrap(spacing: 6, runSpacing: 6, children: [

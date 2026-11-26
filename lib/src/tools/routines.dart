@@ -238,7 +238,8 @@ class _RoutineToolState extends State<RoutineTool> {
           ]),
           const SizedBox(height: 8),
           SizedBox(
-            height: 96,
+            // Çizim + iki satır ad (yazı boyutuyla büyür).
+            height: 60 + MediaQuery.textScalerOf(context).scale(11) * 1.3 * 2 + 4,
             child: ListView(scrollDirection: Axis.horizontal, children: [
               for (final s in r.steps)
                 SizedBox(
@@ -251,7 +252,8 @@ class _RoutineToolState extends State<RoutineTool> {
                         painter: FigurePainter(exercise(s.$1).a, null, 0, AppLook.of(context).accent),
                       ),
                     ),
-                    Text(L(t, 'ex_${s.$1}'), maxLines: 2, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11)),
+                    Text(L(t, 'ex_${s.$1}'),
+                        maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11)),
                   ]),
                 ),
             ]),
